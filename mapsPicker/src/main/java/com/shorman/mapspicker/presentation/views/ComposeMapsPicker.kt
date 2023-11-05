@@ -14,6 +14,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -75,6 +79,40 @@ fun ComposeMapsPicker(
             )
         )
 
+        var requestPermission by remember { mutableStateOf(false) }
+        var shouldShowRationale by remember { mutableStateOf(false) }
+        var prevShouldShowRationale by remember { mutableStateOf(locationPermissionsState.shouldShowRationale) }
+        val userDeniedPermission = shouldShowRationale && !locationPermissionsState.allPermissionsGranted
+
+        LaunchedEffect(locationPermissionsState.shouldShowRationale) {
+            if (prevShouldShowRationale && !locationPermissionsState.shouldShowRationale) {
+                shouldShowRationale = true
+            }
+            prevShouldShowRationale = locationPermissionsState.shouldShowRationale
+        }
+
+        if(userDeniedPermission) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Text(
+                    text = getRationalText(true),
+                    color = Color.Black,
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = { context.openAppSettings() })
+                {
+                    Text(getButtonText(true))
+                }
+            }
+            return@Surface
+        }
+
         if (locationPermissionsState.allPermissionsGranted) {
             MapsPicker(
                 currentLocationIconRes = currentLocationIconRes,
@@ -86,19 +124,17 @@ fun ComposeMapsPicker(
                 enableTouch = enableTouch,
                 onSelectUserLocation = onSelectUserLocation
             )
-        } else {
-
-            LaunchedEffect(Unit) {
+        }  else {
+            LaunchedEffect(requestPermission) {
                 locationPermissionsState.launchMultiplePermissionRequest()
             }
-
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
                 Text(
-                    text = getRationalText(locationPermissionsState.shouldShowRationale),
+                    text = getRationalText(false),
                     color = Color.Black,
                     modifier = Modifier.padding(horizontal = 20.dp),
                     textAlign = TextAlign.Center
@@ -106,17 +142,16 @@ fun ComposeMapsPicker(
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
                     onClick = {
-                        if (locationPermissionsState.shouldShowRationale) {
-                            context.openAppSettings()
+                        if(shouldShowRationale) {
+                            requestPermission = !requestPermission
                         } else {
-                            locationPermissionsState.launchMultiplePermissionRequest()
+                            context.openAppSettings()
                         }
                     })
                 {
-                    Text(getButtonText(locationPermissionsState.shouldShowRationale))
+                    Text(getButtonText(!shouldShowRationale))
                 }
             }
         }
-
     }
 }
