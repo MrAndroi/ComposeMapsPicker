@@ -19,9 +19,9 @@ You can refer to the sample under the app, Then navigate to MainActivity.kt.
 		}
 	}
 	
-	//Then add these lines to your dependencies
+	//Then add these lines to your dependencies, Check Releases for latest version
 	dependencies {
-	     implementation 'com.github.MrAndroi:ComposeMapsPicker:1.0.3-alpha'
+	     implementation 'com.github.MrAndroi:ComposeMapsPicker:LATEST'
 	}
 
      <application
