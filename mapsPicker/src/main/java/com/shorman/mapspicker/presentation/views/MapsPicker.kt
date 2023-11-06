@@ -89,8 +89,8 @@ internal fun MapsPicker(
     val viewModel = remember {
         MapsPickerViewModel(
             locationTracker = providesLocationTracker(
-                context = context,
-                fusedLocationProviderClient = providesFusedLocationProviderClient(context)
+                context = context.applicationContext,
+                fusedLocationProviderClient = providesFusedLocationProviderClient(context.applicationContext)
             ),
             enableMyLocation = enableMyLocation
         )
