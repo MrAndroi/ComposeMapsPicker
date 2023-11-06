@@ -1,11 +1,13 @@
 # Compose Maps Picker: Android Location Picker Library
 
-The Maps Picker library is a powerful Android tool that allows users to seamlessly pick their location on a map while providing customization options for map appearance and handling location permissions. This library simplifies the process of obtaining user location and offers numerous features for your Android app.
+The Maps Picker library is a powerful Android tool that allows users to seamlessly pick their
+location on a map while providing customization options for map appearance and handling location
+permissions. This library simplifies the process of obtaining user location and offers numerous
+features for your Android app.
 
 ## Screenshot
 
 ![How it looks](screenshots/sample.gif)
-
 
 ## Usage
 
@@ -30,17 +32,23 @@ You can refer to the sample under the app, Then navigate to MainActivity.kt.
 
     </application>
 
-    //Usage of ComposeMapsPicker
-    ComposeMapsPicker(
-      moveToMyLocationIconRes = R.drawable.locate_me_icon,
-      moveToMyLocationIconAlignment = IconAlignment.TOP_RIGHT,
-      enableMyLocation = true,
-      enableCompass = true
-      ) { location ->
-         //location object contains data about selected location
-         //This got called everytime user selects new location
-         this@MainActivity.showToast("${location.lng}")
-      }
+     //Usage of ComposeMapsPicker
+     ComposeMapsPicker(
+       moveToMyLocationIconRes = R.drawable.locate_me_icon,
+       moveToMyLocationIconAlignment = IconAlignment.TOP_RIGHT,
+       enableMyLocation = true,
+       enableCompass = true,
+       enableAnimations = true,
+       currentLocationIconTint = Color.Magenta,
+       getLocationInfo = true,
+       //Here you can pass any language you want, or use fromCodeToLocationInfoLanguage()
+       //To select your device language, Please check LocationInfoLanguage to see supported languages
+       locationInfoLanguage = LocationInfoLanguage.DE
+           ) { location ->
+               //location object contains data about selected location
+               //This got called everytime user selects new location
+               this@MainActivity.showToast(location.getFormattedAddress())
+           }
 
 
 ```
@@ -71,7 +79,6 @@ Now let's walk through the available customizations:
     onSelectUserLocation: (UserLocation) -> Unit,
 
 ```
-
 
 ### That's it :).
 
