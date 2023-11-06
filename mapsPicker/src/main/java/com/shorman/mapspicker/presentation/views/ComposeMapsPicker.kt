@@ -29,6 +29,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.shorman.mapspicker.R
 import com.shorman.mapspicker.presentation.model.IconAlignment
+import com.shorman.mapspicker.presentation.model.LocationInfoLanguage
 import com.shorman.mapspicker.presentation.model.UserLocation
 import com.shorman.mapspicker.presentation.utils.openAppSettings
 
@@ -51,7 +52,9 @@ fun ComposeMapsPicker(
     enableAnimations: Boolean = true,
     myLocationIconTint: Color = MaterialTheme.colorScheme.primary,
     currentLocationIconTint: Color = MaterialTheme.colorScheme.primary,
-    onSelectUserLocation: (UserLocation) -> Unit,
+    getLocationInfo: Boolean = false,
+    locationInfoLanguage: LocationInfoLanguage = LocationInfoLanguage.EN,
+    onSelectUserLocation: suspend (UserLocation) -> Unit,
 ) {
 
     val context = LocalContext.current
@@ -86,7 +89,8 @@ fun ComposeMapsPicker(
         var requestPermission by remember { mutableStateOf(false) }
         var shouldShowRationale by remember { mutableStateOf(false) }
         var prevShouldShowRationale by remember { mutableStateOf(locationPermissionsState.shouldShowRationale) }
-        val userDeniedPermission = shouldShowRationale && !locationPermissionsState.allPermissionsGranted
+        val userDeniedPermission =
+            shouldShowRationale && !locationPermissionsState.allPermissionsGranted
 
         LaunchedEffect(locationPermissionsState.shouldShowRationale) {
             if (prevShouldShowRationale && !locationPermissionsState.shouldShowRationale) {
@@ -95,7 +99,7 @@ fun ComposeMapsPicker(
             prevShouldShowRationale = locationPermissionsState.shouldShowRationale
         }
 
-        if(userDeniedPermission) {
+        if (userDeniedPermission) {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -129,9 +133,11 @@ fun ComposeMapsPicker(
                 enableAnimations = enableAnimations,
                 myLocationIconTint = myLocationIconTint,
                 currentLocationIconTint = currentLocationIconTint,
+                getLocationInfo = getLocationInfo,
+                locationInfoLanguage = locationInfoLanguage,
                 onSelectUserLocation = onSelectUserLocation
             )
-        }  else {
+        } else {
             LaunchedEffect(requestPermission) {
                 locationPermissionsState.launchMultiplePermissionRequest()
             }
@@ -149,7 +155,7 @@ fun ComposeMapsPicker(
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
                     onClick = {
-                        if(shouldShowRationale) {
+                        if (shouldShowRationale) {
                             requestPermission = !requestPermission
                         } else {
                             context.openAppSettings()

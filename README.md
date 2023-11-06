@@ -66,6 +66,8 @@ Now let's walk through the available customizations:
     enableAnimations: Boolean = true,
     myLocationIconTint: Color = MaterialTheme.colorScheme.primary,
     currentLocationIconTint: Color = MaterialTheme.colorScheme.primary,
+    getLocationInfo: Boolean = false,
+    locationInfoLanguage: LocationInfoLanguage = LocationInfoLanguage.EN,
     onSelectUserLocation: (UserLocation) -> Unit,
 
 ```

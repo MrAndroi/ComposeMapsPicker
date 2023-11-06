@@ -42,9 +42,12 @@ import com.shorman.mapspicker.data.di.LocationModule.providesFusedLocationProvid
 import com.shorman.mapspicker.data.di.LocationModule.providesLocationTracker
 import com.shorman.mapspicker.presentation.MapsPickerViewModel
 import com.shorman.mapspicker.presentation.model.IconAlignment
+import com.shorman.mapspicker.presentation.model.LocationInfoLanguage
 import com.shorman.mapspicker.presentation.model.UserLocation
 import com.shorman.mapspicker.presentation.utils.animateToLocation
+import com.shorman.mapspicker.presentation.utils.getUserLocation
 import com.shorman.mapspicker.presentation.utils.moveToLocation
+import kotlinx.coroutines.async
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
@@ -59,7 +62,9 @@ internal fun MapsPicker(
     enableAnimations: Boolean = true,
     myLocationIconTint: Color = MaterialTheme.colorScheme.primary,
     currentLocationIconTint: Color = MaterialTheme.colorScheme.primary,
-    onSelectUserLocation: (UserLocation) -> Unit,
+    getLocationInfo: Boolean = false,
+    locationInfoLanguage: LocationInfoLanguage = LocationInfoLanguage.EN,
+    onSelectUserLocation: suspend (UserLocation) -> Unit,
 ) {
 
     val context = LocalContext.current
@@ -144,7 +149,13 @@ internal fun MapsPicker(
     LaunchedEffect(selectedLocation) {
         selectedLocation?.let { latLng ->
             if (latLng != LatLng(0.0, 0.0)) {
-                onSelectUserLocation(UserLocation(latLng.latitude, latLng.longitude))
+                val userLocation = if (getLocationInfo) {
+                    val location = async { latLng.getUserLocation(context, locationInfoLanguage) }
+                    location.await()
+                } else {
+                    UserLocation(latLng.latitude, latLng.longitude)
+                }
+                onSelectUserLocation(userLocation)
             }
         }
     }
