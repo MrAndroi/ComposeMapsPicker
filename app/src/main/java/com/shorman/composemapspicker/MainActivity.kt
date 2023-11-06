@@ -41,7 +41,9 @@ class MainActivity : ComponentActivity() {
                             moveToMyLocationIconRes = R.drawable.locate_me_icon,
                             moveToMyLocationIconAlignment = IconAlignment.TOP_RIGHT,
                             enableMyLocation = true,
-                            enableCompass = true
+                            enableCompass = true,
+                            enableAnimations = true,
+                            currentLocationIconTint = Color.Magenta
                         ) { location ->
                             //location object contains data about selected location
                             //This got called everytime user selects new location

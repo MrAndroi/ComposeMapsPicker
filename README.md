@@ -63,6 +63,9 @@ Now let's walk through the available customizations:
     enableCompass: Boolean = false,
     enableZoomButtons: Boolean = false,
     enableTouch: Boolean = true,
+    enableAnimations: Boolean = true,
+    myLocationIconTint: Color = MaterialTheme.colorScheme.primary,
+    currentLocationIconTint: Color = MaterialTheme.colorScheme.primary,
     onSelectUserLocation: (UserLocation) -> Unit,
 
 ```

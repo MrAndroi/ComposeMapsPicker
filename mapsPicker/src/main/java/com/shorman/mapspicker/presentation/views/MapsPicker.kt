@@ -56,6 +56,9 @@ internal fun MapsPicker(
     enableCompass: Boolean = false,
     enableZoomButtons: Boolean = false,
     enableTouch: Boolean = true,
+    enableAnimations: Boolean = true,
+    myLocationIconTint: Color = MaterialTheme.colorScheme.primary,
+    currentLocationIconTint: Color = MaterialTheme.colorScheme.primary,
     onSelectUserLocation: (UserLocation) -> Unit,
 ) {
 
@@ -153,7 +156,7 @@ internal fun MapsPicker(
     )
 
     val shadow = animateDpAsState(
-        if (cameraPositionState.isMoving) (0).dp else 10.dp,
+        if (cameraPositionState.isMoving) (2).dp else 10.dp,
         label = ""
     )
 
@@ -168,20 +171,23 @@ internal fun MapsPicker(
         )
         Icon(
             imageVector = currentLocationIcon,
-            tint = MaterialTheme.colorScheme.primary,
+            tint = currentLocationIconTint,
             contentDescription = null,
             modifier = Modifier
                 .size(40.dp)
                 .align(Alignment.Center)
-                .offset(y = offsetY.value)
-                .shadow(shadow.value, CircleShape)
+                .offset(y = if (enableAnimations) offsetY.value else (-20).dp)
+                .shadow(if (enableAnimations) shadow.value else 10.dp, CircleShape)
 
         )
 
-        AnimatedVisibility(visible = enableMyLocation, modifier = Modifier.align(moveToMyLocationIconAlignment.align)) {
+        AnimatedVisibility(
+            visible = enableMyLocation,
+            modifier = Modifier.align(moveToMyLocationIconAlignment.align)
+        ) {
             Icon(
                 imageVector = moveToMyLocationIcon,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = myLocationIconTint,
                 contentDescription = null,
                 modifier = Modifier
                     .padding(20.dp)

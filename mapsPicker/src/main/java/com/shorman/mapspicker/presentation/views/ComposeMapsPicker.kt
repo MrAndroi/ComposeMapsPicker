@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,6 +48,9 @@ fun ComposeMapsPicker(
     enableCompass: Boolean = false,
     enableZoomButtons: Boolean = false,
     enableTouch: Boolean = true,
+    enableAnimations: Boolean = true,
+    myLocationIconTint: Color = MaterialTheme.colorScheme.primary,
+    currentLocationIconTint: Color = MaterialTheme.colorScheme.primary,
     onSelectUserLocation: (UserLocation) -> Unit,
 ) {
 
@@ -122,6 +126,9 @@ fun ComposeMapsPicker(
                 enableCompass = enableCompass,
                 enableZoomButtons = enableZoomButtons,
                 enableTouch = enableTouch,
+                enableAnimations = enableAnimations,
+                myLocationIconTint = myLocationIconTint,
+                currentLocationIconTint = currentLocationIconTint,
                 onSelectUserLocation = onSelectUserLocation
             )
         }  else {
