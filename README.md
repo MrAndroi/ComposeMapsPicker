@@ -8,6 +8,7 @@ features for your Android app.
 ## Screenshot
 
 ![How it looks](screenshots/sample.gif)
+![How it looks without google services](screenshots/sample2.gif)
 
 ## Usage
 
