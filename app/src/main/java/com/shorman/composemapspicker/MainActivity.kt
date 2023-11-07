@@ -1,10 +1,8 @@
 package com.shorman.composemapspicker
 
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,13 +20,10 @@ import androidx.compose.ui.unit.dp
 import com.shorman.composemapspicker.ui.theme.ComposeMapsPickerTheme
 import com.shorman.mapspicker.presentation.model.IconAlignment
 import com.shorman.mapspicker.presentation.model.LocationInfoLanguage
-import com.shorman.mapspicker.presentation.utils.fromCodeToLocationInfoLanguage
 import com.shorman.mapspicker.presentation.utils.showToast
 import com.shorman.mapspicker.presentation.views.ComposeMapsPicker
-import java.util.Locale
 
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,6 +40,7 @@ class MainActivity : ComponentActivity() {
                             moveToMyLocationIconAlignment = IconAlignment.TOP_RIGHT,
                             enableMyLocation = true,
                             enableCompass = true,
+                            enableTouch = true,
                             enableAnimations = true,
                             currentLocationIconTint = Color.Magenta,
                             getLocationInfo = true,
@@ -54,7 +50,7 @@ class MainActivity : ComponentActivity() {
                         ) { location ->
                             //location object contains data about selected location
                             //This got called everytime user selects new location
-                            this@MainActivity.showToast(location.getFormattedAddress())
+                            this@MainActivity.showToast(location.lat.toString())
                         }
 
                         //Create any footer you want

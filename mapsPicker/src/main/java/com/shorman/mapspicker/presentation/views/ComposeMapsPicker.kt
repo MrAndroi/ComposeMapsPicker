@@ -1,8 +1,6 @@
 package com.shorman.mapspicker.presentation.views
 
 import android.Manifest
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -31,9 +29,9 @@ import com.shorman.mapspicker.R
 import com.shorman.mapspicker.presentation.model.IconAlignment
 import com.shorman.mapspicker.presentation.model.LocationInfoLanguage
 import com.shorman.mapspicker.presentation.model.UserLocation
+import com.shorman.mapspicker.presentation.utils.isGoogleServicesEnabled
 import com.shorman.mapspicker.presentation.utils.openAppSettings
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ComposeMapsPicker(
@@ -122,21 +120,39 @@ fun ComposeMapsPicker(
         }
 
         if (locationPermissionsState.allPermissionsGranted) {
-            MapsPicker(
-                currentLocationIconRes = currentLocationIconRes,
-                moveToMyLocationIconRes = moveToMyLocationIconRes,
-                moveToMyLocationIconAlignment = moveToMyLocationIconAlignment,
-                enableMyLocation = enableMyLocation,
-                enableCompass = enableCompass,
-                enableZoomButtons = enableZoomButtons,
-                enableTouch = enableTouch,
-                enableAnimations = enableAnimations,
-                myLocationIconTint = myLocationIconTint,
-                currentLocationIconTint = currentLocationIconTint,
-                getLocationInfo = getLocationInfo,
-                locationInfoLanguage = locationInfoLanguage,
-                onSelectUserLocation = onSelectUserLocation
-            )
+            if (isGoogleServicesEnabled(context)) {
+                MapsPicker(
+                    currentLocationIconRes = currentLocationIconRes,
+                    moveToMyLocationIconRes = moveToMyLocationIconRes,
+                    moveToMyLocationIconAlignment = moveToMyLocationIconAlignment,
+                    enableMyLocation = enableMyLocation,
+                    enableCompass = enableCompass,
+                    enableZoomButtons = enableZoomButtons,
+                    enableTouch = enableTouch,
+                    enableAnimations = enableAnimations,
+                    myLocationIconTint = myLocationIconTint,
+                    currentLocationIconTint = currentLocationIconTint,
+                    getLocationInfo = getLocationInfo,
+                    locationInfoLanguage = locationInfoLanguage,
+                    onSelectUserLocation = onSelectUserLocation
+                )
+            } else {
+                MapBoxMap(
+                    currentLocationIconRes = currentLocationIconRes,
+                    moveToMyLocationIconRes = moveToMyLocationIconRes,
+                    moveToMyLocationIconAlignment = moveToMyLocationIconAlignment,
+                    enableMyLocation = enableMyLocation,
+                    enableCompass = enableCompass,
+                    enableTouch = enableTouch,
+                    enableAnimations = enableAnimations,
+                    myLocationIconTint = myLocationIconTint,
+                    currentLocationIconTint = currentLocationIconTint,
+                    getLocationInfo = getLocationInfo,
+                    locationInfoLanguage = locationInfoLanguage,
+                    onSelectUserLocation = onSelectUserLocation
+                )
+            }
+
         } else {
             LaunchedEffect(requestPermission) {
                 locationPermissionsState.launchMultiplePermissionRequest()

@@ -20,4 +20,10 @@ internal object LocationModule {
         fusedLocationProviderClient = fusedLocationProviderClient,
         context = context
     )
+
+    fun providesNoGoogleLocationTracker(
+        context: Context
+    ): LocationTracker = NoGoogleLocationTracker(
+        context = context
+    )
 }

@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 
 internal class MapsPickerViewModel constructor(
     private val locationTracker: LocationTracker,
-    private val enableMyLocation: Boolean
+    enableMyLocation: Boolean
 ) : ViewModel() {
 
     var currentLocation by mutableStateOf<Pair<Boolean, Location?>>(false to null)
@@ -26,10 +26,15 @@ internal class MapsPickerViewModel constructor(
 
     fun getCurrentLocation(animate: Boolean = false) = viewModelScope.launch {
         currentLocation = animate to locationTracker.getCurrentLocation()
+        println("")
     }
 
     fun updateSelectedLocation(newLocation: LatLng) = viewModelScope.launch {
         selectedLocation = newLocation
+    }
+
+    fun resetCurrentLocation() {
+        currentLocation = currentLocation.copy(second = null)
     }
 
 }

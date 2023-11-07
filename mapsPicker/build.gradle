@@ -55,6 +55,9 @@ dependencies {
 
     // GMS - Google Mobile Services
     implementation("com.google.android.gms:play-services-location:21.0.1")
+
+    //MapsBox
+    implementation 'com.mapbox.maps:android:10.16.1'
 }
 
 afterEvaluate {

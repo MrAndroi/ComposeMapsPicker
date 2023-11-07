@@ -2,17 +2,22 @@ package com.shorman.mapspicker.presentation.utils
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.net.Uri
-import android.os.Build
 import android.provider.Settings
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
+import com.mapbox.geojson.Point
+import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.plugin.animation.flyTo
 import com.shorman.mapspicker.presentation.model.LocationInfoLanguage
 import com.shorman.mapspicker.presentation.model.UserLocation
 import kotlinx.coroutines.Dispatchers
@@ -52,6 +57,24 @@ internal suspend fun CameraPositionState.animateToLocation(latLng: LatLng) {
     )
 }
 
+internal fun MapboxMap.animateToLocation(latLng: LatLng) {
+    this.flyTo(
+        CameraOptions.Builder()
+            .zoom(16.0)
+            .center(Point.fromLngLat(latLng.longitude, latLng.latitude))
+            .build()
+    )
+}
+
+internal fun MapboxMap.moveToLocation(latLng: LatLng) {
+    this.setCamera(
+        CameraOptions.Builder()
+            .zoom(16.0)
+            .center(Point.fromLngLat(latLng.longitude, latLng.latitude))
+            .build()
+    )
+}
+
 fun Context.showToast(message: String) {
     Toast.makeText(
         this,
@@ -60,7 +83,6 @@ fun Context.showToast(message: String) {
     ).show()
 }
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 internal suspend fun LatLng.getUserLocation(
     context: Context,
     language: LocationInfoLanguage
@@ -87,9 +109,9 @@ internal suspend fun LatLng.getUserLocation(
                 language = language
             )
         } else {
-            return@withContext UserLocation(
-                lat = this@getUserLocation.latitude,
-                lng = this@getUserLocation.longitude
+            return@withContext fillUserLocationWithoutInfo(
+                this@getUserLocation.latitude,
+                this@getUserLocation.longitude
             )
         }
     } catch (e: Exception) {
@@ -99,4 +121,19 @@ internal suspend fun LatLng.getUserLocation(
 
 fun String.fromCodeToLocationInfoLanguage(): LocationInfoLanguage {
     return LocationInfoLanguage.valueOf(this.uppercase(Locale.ROOT))
+}
+
+fun fillUserLocationWithoutInfo(lat: Double, lng: Double): UserLocation {
+    return UserLocation(
+        lat = lat,
+        lng = lng,
+        country = "Google",
+        city = "Services Are",
+        street = "Not Available to fetch location info"
+    )
+}
+
+internal fun isGoogleServicesEnabled(context: Context): Boolean {
+    return GoogleApiAvailability.getInstance()
+        .isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
 }

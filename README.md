@@ -1,4 +1,4 @@
-# Compose Maps Picker: Android Location Picker Library
+# Compose Maps Picker: Android Location Picker Library (Supports devices that don't have google services)
 
 The Maps Picker library is a powerful Android tool that allows users to seamlessly pick their
 location on a map while providing customization options for map appearance and handling location
@@ -22,15 +22,34 @@ You can refer to the sample under the app, Then navigate to MainActivity.kt.
 	}
 	
 	//Then add these lines to your dependencies, Check Releases for latest version
+	1- Add Mappciker dependencies
 	dependencies {
 	     implementation 'com.github.MrAndroi:ComposeMapsPicker:LATEST'
 	}
 
+    2- in your manifest.xml file, Add google API_KEY
      <application
-        
         <meta-data android:name="com.google.android.geo.API_KEY" android:value="PUT_YOUR_KEY_HERE"/>
-
     </application>
+    
+    3- in your strings.xml file add mapbox_access_token, Please refer to mapbox.com and create account in order to get this token
+    <string name="mapbox_access_token">PUT_MAPBOX_ACCESS_TOKEN</string>
+    
+    4- add the following line with MAPBOX_DOWNLOADS_TOKEN to gradle.properties file, , Please refer to mapbox.com and create account in order to get this token
+    MAPBOX_DOWNLOADS_TOKEN=PUT_MAP_BOX_DOWNLOADS_TOKEN
+    
+    5- Last step is to add these lines to settings.gradle file in order to download Mapbox Sdk
+    maven {
+       url 'https://api.mapbox.com/downloads/v2/releases/maven'
+       authentication {
+           basic(BasicAuthentication)
+       }
+       credentials {
+           username = "mapbox"
+           password = MAPBOX_DOWNLOADS_TOKEN
+       }
+    }
+
 
      //Usage of ComposeMapsPicker
      ComposeMapsPicker(

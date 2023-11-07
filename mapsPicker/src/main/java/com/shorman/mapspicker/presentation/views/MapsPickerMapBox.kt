@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.sharp.Home
 import androidx.compose.material.icons.sharp.LocationOn
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -22,6 +23,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -31,13 +33,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.MapUiSettings
-import com.google.maps.android.compose.rememberCameraPositionState
-import com.shorman.mapspicker.data.di.LocationModule.providesFusedLocationProviderClient
-import com.shorman.mapspicker.data.di.LocationModule.providesLocationTracker
+import com.mapbox.android.gestures.MoveGestureDetector
+import com.mapbox.maps.MapView
+import com.mapbox.maps.Style
+import com.mapbox.maps.plugin.compass.compass
+import com.mapbox.maps.plugin.gestures.OnMoveListener
+import com.mapbox.maps.plugin.gestures.addOnMoveListener
+import com.mapbox.maps.plugin.gestures.gestures
+import com.mapbox.maps.plugin.gestures.removeOnMoveListener
+import com.mapbox.maps.plugin.locationcomponent.location
+import com.shorman.mapspicker.data.di.LocationModule
 import com.shorman.mapspicker.presentation.MapsPickerViewModel
 import com.shorman.mapspicker.presentation.model.IconAlignment
 import com.shorman.mapspicker.presentation.model.LocationInfoLanguage
@@ -48,13 +55,12 @@ import com.shorman.mapspicker.presentation.utils.moveToLocation
 import kotlinx.coroutines.async
 
 @Composable
-internal fun MapsPicker(
+fun MapBoxMap(
     currentLocationIconRes: Int? = null,
     moveToMyLocationIconRes: Int? = null,
     moveToMyLocationIconAlignment: IconAlignment = IconAlignment.TOP_RIGHT,
     enableMyLocation: Boolean = true,
     enableCompass: Boolean = false,
-    enableZoomButtons: Boolean = false,
     enableTouch: Boolean = true,
     enableAnimations: Boolean = true,
     myLocationIconTint: Color = MaterialTheme.colorScheme.primary,
@@ -63,7 +69,6 @@ internal fun MapsPicker(
     locationInfoLanguage: LocationInfoLanguage = LocationInfoLanguage.EN,
     onSelectUserLocation: suspend (UserLocation) -> Unit,
 ) {
-
     val context = LocalContext.current
 
     val currentLocationIcon = remember(currentLocationIconRes) {
@@ -90,12 +95,10 @@ internal fun MapsPicker(
         }
     }
 
-
     val viewModel = remember {
         MapsPickerViewModel(
-            locationTracker = providesLocationTracker(
+            locationTracker = LocationModule.providesNoGoogleLocationTracker(
                 context = context.applicationContext,
-                fusedLocationProviderClient = providesFusedLocationProviderClient(context.applicationContext)
             ),
             enableMyLocation = enableMyLocation
         )
@@ -104,42 +107,32 @@ internal fun MapsPicker(
     val currentLocation = viewModel.currentLocation
     val selectedLocation = viewModel.selectedLocation
 
-    val properties by remember {
-        mutableStateOf(MapProperties(isMyLocationEnabled = enableMyLocation))
+    var isMovingCameraMoving by remember {
+        mutableStateOf(false)
     }
 
-    val uiSettings by remember {
-        mutableStateOf(
-            MapUiSettings(
-                myLocationButtonEnabled = false,
-                zoomControlsEnabled = enableZoomButtons,
-                compassEnabled = enableCompass,
-                zoomGesturesEnabled = enableTouch,
-                tiltGesturesEnabled = enableTouch,
-                rotationGesturesEnabled = enableTouch,
-                scrollGesturesEnabled = enableTouch,
-            )
-        )
+    var mapViewInstance: MapView? by remember {
+        mutableStateOf(null)
     }
 
-    val cameraPositionState = rememberCameraPositionState()
+    val moveListener = remember {
+        object : OnMoveListener {
+            override fun onMove(detector: MoveGestureDetector) = false
 
-    if (!cameraPositionState.isMoving) {
-        val latLng = cameraPositionState.position.target
-        viewModel.updateSelectedLocation(latLng)
-    }
-
-    LaunchedEffect(currentLocation) {
-        val location = currentLocation.second
-        val animate = currentLocation.first
-        if (animate) {
-            location?.let {
-                cameraPositionState.animateToLocation(LatLng(it.latitude, it.longitude))
+            override fun onMoveBegin(detector: MoveGestureDetector) {
+                isMovingCameraMoving = true
             }
-        } else {
-            location?.let {
-                cameraPositionState.moveToLocation(LatLng(it.latitude, it.longitude))
+
+            override fun onMoveEnd(detector: MoveGestureDetector) {
+                isMovingCameraMoving = false
+                val cameraCenter = mapViewInstance?.getMapboxMap()?.cameraState?.center
+                val latLng = LatLng(
+                    cameraCenter?.latitude() ?: 0.0,
+                    cameraCenter?.longitude() ?: 0.0
+                )
+                viewModel.updateSelectedLocation(latLng)
             }
+
         }
     }
 
@@ -158,25 +151,60 @@ internal fun MapsPicker(
     }
 
     val offsetY = animateDpAsState(
-        if (cameraPositionState.isMoving) (-40).dp else (-20).dp,
+        if (isMovingCameraMoving) (-40).dp else (-20).dp,
         animationSpec = tween(durationMillis = 200),
         label = ""
     )
 
     val shadow = animateDpAsState(
-        if (cameraPositionState.isMoving) (2).dp else 10.dp,
+        if (isMovingCameraMoving) (2).dp else 10.dp,
         label = ""
     )
+
+    LaunchedEffect(currentLocation) {
+        val location = currentLocation.second
+        val animate = currentLocation.first
+        if (animate) {
+            location?.let {
+                mapViewInstance?.getMapboxMap()
+                    ?.animateToLocation(LatLng(it.latitude, it.longitude))
+            }
+        } else {
+            location?.let {
+                mapViewInstance?.getMapboxMap()?.moveToLocation(LatLng(it.latitude, it.longitude))
+            }
+        }
+    }
 
     Box(
         Modifier.fillMaxSize()
     ) {
-        GoogleMap(
-            modifier = Modifier.fillMaxSize(),
-            cameraPositionState = cameraPositionState,
-            properties = properties,
-            uiSettings = uiSettings,
+        AndroidView(
+            factory = {
+                MapView(it).also { mapView ->
+                    mapView.getMapboxMap().loadStyleUri(Style.LIGHT) {
+                        mapView.location.updateSettings {
+                            enabled = true
+                            pulsingEnabled = true
+                        }
+                    }
+
+                    mapView.compass.enabled = enableCompass
+                    mapView.gestures.pitchEnabled = enableTouch
+                    mapView.gestures.rotateEnabled = enableTouch
+                    mapView.gestures.pinchToZoomEnabled = enableTouch
+                    mapView.gestures.scrollEnabled = enableTouch
+                    mapView.getMapboxMap().addOnMoveListener(moveListener)
+                    mapViewInstance = mapView
+                }
+            },
+            update = { _ ->
+            },
+            onRelease = { mapView ->
+                mapView.getMapboxMap().removeOnMoveListener(moveListener)
+            },
         )
+
         Icon(
             imageVector = currentLocationIcon,
             tint = currentLocationIconTint,
@@ -207,6 +235,7 @@ internal fun MapsPicker(
                         onClickLabel = null,
                         role = Role.Tab,
                     ) {
+                        viewModel.resetCurrentLocation()
                         viewModel.getCurrentLocation(true)
                     }
             )
@@ -214,4 +243,13 @@ internal fun MapsPicker(
 
     }
 
+    if (currentLocation.second == null && enableMyLocation) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(50.dp)
+                    .align(Alignment.Center)
+            )
+        }
+    }
 }

@@ -53,6 +53,7 @@ internal class DefaultLocationTracker(
                     cont.resume(it)
                 }
                 addOnFailureListener {
+                    println(it)
                     cont.resume(null)
                 }
                 addOnCanceledListener {
