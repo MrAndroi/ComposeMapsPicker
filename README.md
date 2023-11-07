@@ -2,7 +2,9 @@
 
 The Maps Picker library is a powerful Android tool that allows users to seamlessly pick their
 location on a map while providing customization options for map appearance and handling location
-permissions. This library simplifies the process of obtaining user location and offers numerous
+permissions, Getting location info in several languages.
+
+This library simplifies the process of obtaining user location and offers numerous
 features for your Android app.
 
 ## Screenshot
@@ -97,6 +99,16 @@ Now let's walk through the available customizations:
     getLocationInfo: Boolean = false,
     locationInfoLanguage: LocationInfoLanguage = LocationInfoLanguage.EN,
     onSelectUserLocation: (UserLocation) -> Unit,
+    
+    //Suppored languages
+    English
+    Arabic
+    French
+    German
+    Spanish
+    Japanese
+    Korean
+    Hindi
 
 ```
 
